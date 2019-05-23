@@ -1,0 +1,47 @@
+---
+
+- name: Install required apt pkg
+  apt: name=python-psycopg2
+
+- name: Get db_endpoint
+  shell: cd ../terraform; terraform output db_endpoint
+  register: db_endpoint
+  delegate_to: localhost
+
+- name: Set "postgresql_host" variable
+  set_fact:
+    postgresql_host: "{{ db_endpoint.stdout }}"
+
+- name: Create "{{ postgresql_db_name }}" db
+  postgresql_db:
+    name: "{{ postgresql_db_name }}"
+    login_host: "{{ postgresql_host }}"
+    port: "{{ postgresql_port }}"
+    login_user: "{{ postgresql_root_user }}"
+    login_password: "{{ vault_postgresql_root_user_pass }}"
+
+- name: Create the "{{ postgresql_db_user }}" user
+  postgresql_user:
+    db: "{{ postgresql_db_name }}"
+    name: "{{ postgresql_db_user }}"
+    password: "{{ vault_postgresql_db_user_pass }}"
+    login_host: "{{ postgresql_host }}"
+    port: "{{ postgresql_port }}"
+    login_user: "{{ postgresql_root_user }}"
+    login_password: "{{ vault_postgresql_root_user_pass }}"
+    priv: CONNECT
+    encrypted: yes
+
+- name: Set access for "{{ postgresql_db_user }}" to "{{ postgresql_db_name }}"
+  postgresql_privs:
+    db: "{{ postgresql_db_name }}"
+    role: "{{ postgresql_db_user }}"
+    type: table
+    objs: ALL_IN_SCHEMA
+    state: present
+    privs: SELECT
+    grant_option: no
+    login_host: "{{ postgresql_host }}"
+    port: "{{ postgresql_port }}"
+    login_user: "{{ postgresql_root_user }}"
+    login_password: "{{ vault_postgresql_root_user_pass }}"

@@ -1,0 +1,6 @@
+[sshd]
+enabled = true
+findtime = 600
+maxretry = 4
+bantime = 86400
+port = {{ ssh_port }}

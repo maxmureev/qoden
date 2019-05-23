@@ -1,0 +1,18 @@
+---
+#- include: _automation_user.yml
+#- include: nginx.yml
+#  when: consul_server
+
+- name: Install Common software
+  hosts: "{{ target }}"
+  gather_facts: True
+  user: "{{ deploy_user }}"
+  become: true
+  roles:
+    - role: common
+    - role: docker
+    - role: fail2ban
+
+  tasks:
+    - name: Install Nginx to check the HTTP port is open
+      apt: name=nginx state=present update_cache=yes

@@ -1,0 +1,10 @@
+---
+
+- name: Deploy PostgreSQL
+  hosts: "{{ target }}"
+#  gather_facts: True
+  user: "{{ deploy_user }}"
+  become: true
+
+  roles:
+    - role: postgresql
