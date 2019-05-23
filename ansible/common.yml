@@ -1,7 +1,4 @@
 ---
-#- include: _automation_user.yml
-#- include: nginx.yml
-#  when: consul_server
 
 - name: Install Common software
   hosts: "{{ target }}"
